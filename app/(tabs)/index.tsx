@@ -2,11 +2,11 @@ import { ActivityIndicator, StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useEffect, useState } from 'react';
 import SudokuGrid from '@/components/SudokuGrid';
-import { ApiResponse } from '@/types';
 import { fetchSudokuGrid } from '@/services/sudokuService';
+import { CellResponse } from '@/types';
 
 export default function TabOneScreen() {
-  const [data, setData] = useState<ApiResponse | null>(null);
+  const [grid, setGrid] = useState<CellResponse[][] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -16,7 +16,7 @@ export default function TabOneScreen() {
   const fetchData = async () => {
     try {
       const response = await fetchSudokuGrid();
-      setData(response);
+      setGrid(response.newboard.grids[0].value);
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -32,13 +32,19 @@ export default function TabOneScreen() {
     );
   }
 
-  const grid = data?.newboard.grids[0].value;
+  const handleCellChange = (row: number, col: number, value: number) => {
+    if (grid) {
+      const updatedGrid = [...grid];
+      updatedGrid[row][col].value = value;
+      setGrid(updatedGrid);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Sudoku</Text>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      {grid && <SudokuGrid grid={grid} />}
+      {grid && <SudokuGrid grid={grid} onCellChange={handleCellChange} />}
     </View>
   );
 }

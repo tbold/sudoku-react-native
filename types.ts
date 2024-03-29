@@ -1,7 +1,7 @@
 interface ApiResponse {
   newboard: {
     grids: Array<{
-      value: number[][];
+      value: CellResponse[][];
       solution: number[][];
       difficulty: string;
     }>;
@@ -10,4 +10,9 @@ interface ApiResponse {
   };
 }
 
-export { ApiResponse };
+interface CellResponse {
+  value?: number;
+  isMaster: boolean;
+}
+
+export { ApiResponse, CellResponse };
