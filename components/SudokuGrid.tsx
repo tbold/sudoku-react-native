@@ -1,6 +1,6 @@
 import { CellResponse } from '@/types';
-import React from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 
 interface SudokuGridProps {
   grid: CellResponse[][];
@@ -8,6 +8,7 @@ interface SudokuGridProps {
 }
 
 const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
+  const [showHints, setShowHints] = useState(false);
   const isConflicting = (row: number, col: number, value: number): boolean => {
     const rowConflict = grid[row].some(
       (cell) => cell.value === value
@@ -40,6 +41,7 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
       return <Text style={styles.cellText}>{cell.value}</Text>;
     } else {
       const hints = getHints(row, col);
+      const showCellHints = showHints && !cell.value;
       return (
         <View style={styles.cellInputContainer}>
           <TextInput
@@ -48,7 +50,7 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
             maxLength={1}
             onChangeText={(value) => onCellChange(row, col, Number(value))}
           />
-          <View style={styles.hintsContainer}>
+          {showCellHints && (<View style={styles.hintsContainer}>
             {[...Array(3)].map((_, rowIndex) => (
               <View key={rowIndex} style={styles.hintsRow}>
                 {[...Array(3)].map((_, colIndex) => {
@@ -62,32 +64,42 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
                 })}
               </View>
             ))}
-          </View>
+          </View>)}
         </View>
       );
     }
   };
 
   return (
-    <View style={styles.gridContainer}>
-      {grid.map((row, rowIndex) => (
-        <View key={rowIndex} style={styles.row}>
-          {row.map((cell, cellIndex) => {
-            const isError = !cell.isMaster && cell.value && isConflicting(rowIndex, cellIndex, cell.value);
-            const cellStyle = [
-              (rowIndex + 1) % 3 === 0 && styles.bottomBorder,
-              (cellIndex + 1) % 3 === 0 && styles.rightBorder,
-              isError ? styles.errorCell : styles.cell,
-            ];
+    <View>
+      <View style={styles.gridContainer}>
+        {grid.map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.row}>
+            {row.map((cell, cellIndex) => {
+              const isError = !cell.isMaster && cell.value && isConflicting(rowIndex, cellIndex, cell.value);
+              const cellStyle = [
+                (rowIndex + 1) % 3 === 0 && styles.bottomBorder,
+                (cellIndex + 1) % 3 === 0 && styles.rightBorder,
+                isError ? styles.errorCell : styles.cell,
+              ];
 
-            return (
-              <View key={cellIndex} style={cellStyle}>
-                {renderCell(cell, rowIndex, cellIndex)}
-              </View>
-            );
-          })}
-        </View>
-      ))}
+              return (
+                <View key={cellIndex} style={cellStyle}>
+                  {renderCell(cell, rowIndex, cellIndex)}
+                </View>
+              );
+            })}
+          </View>
+        ))}
+      </View>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => setShowHints(!showHints)}
+      >
+        <Text style={styles.buttonText}>
+          {showHints ? 'Hide Hints' : 'Show Hints'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -155,6 +167,17 @@ const styles = StyleSheet.create({
     width: 13,
     height: 13,
     textAlign: 'center',
+  },
+  button: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: 'blue',
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 
