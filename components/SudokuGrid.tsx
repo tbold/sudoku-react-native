@@ -25,17 +25,45 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
     return rowConflict || colConflict || boxConflict;
   };
 
+  const getHints = (row: number, col: number): number[] => {
+    const hints: number[] = [];
+    for (let value = 1; value <= 9; value++) {
+      if (!isConflicting(row, col, value)) {
+        hints.push(value);
+      }
+    }
+    return hints;
+  };
+
   const renderCell = (cell: CellResponse, row: number, col: number) => {
     if (cell.isMaster) {
       return <Text style={styles.cellText}>{cell.value}</Text>;
     } else {
+      const hints = getHints(row, col);
       return (
-        <TextInput
-          style={styles.cellInput}
-          keyboardType="numeric"
-          maxLength={1}
-          onChangeText={(value) => onCellChange(row, col, Number(value))}
-        />
+        <View style={styles.cellInputContainer}>
+          <TextInput
+            style={styles.cellInput}
+            keyboardType="numeric"
+            maxLength={1}
+            onChangeText={(value) => onCellChange(row, col, Number(value))}
+          />
+          <View style={styles.hintsContainer}>
+            {[...Array(3)].map((_, rowIndex) => (
+              <View key={rowIndex} style={styles.hintsRow}>
+                {[...Array(3)].map((_, colIndex) => {
+                  const hintValue = rowIndex * 3 + colIndex + 1;
+                  const isHint = hints.includes(hintValue);
+                  return (
+                    <Text key={colIndex} style={styles.hintText}>
+                      {isHint ? hintValue : ' '}
+                    </Text>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+        </View>
       );
     }
   };
@@ -103,6 +131,30 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: 'white',
+  },
+  cellInputContainer: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hintsContainer: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 40,
+    height: 40,
+    zIndex: -1,
+  },
+  hintsRow: {
+    flexDirection: 'row',
+  },
+  hintText: {
+    fontSize: 10,
+    color: 'gray',
+    width: 13,
+    height: 13,
+    textAlign: 'center',
   },
 });
 
