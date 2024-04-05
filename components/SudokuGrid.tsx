@@ -1,6 +1,6 @@
 import { CellResponse } from '@/types';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import Cell from '@/components/Cell';
 
 interface SudokuGridProps {
@@ -10,6 +10,14 @@ interface SudokuGridProps {
 
 const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
   const [showHints, setShowHints] = useState(false);
+  const [selectedCell, setSelectedCell] = useState<{ row: number, col: number } | null>(null);
+  const handleCellSelect = (row: number, col: number) => {
+    if (selectedCell?.row == row && selectedCell.col) {
+      setSelectedCell(null);
+    } else {
+      setSelectedCell({ row, col });
+    }
+  };
 
   return (
     <View>
@@ -31,6 +39,8 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
                     col={cellIndex}
                     showHints={showHints}
                     onCellChange={onCellChange}
+                    onCellSelect={handleCellSelect}
+                    selectedCell={selectedCell}
                   />
                 </View>
               );
@@ -49,6 +59,8 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
     </View>
   );
 };
+const screenWidth = Dimensions.get('window').width;
+const cellSize = Math.floor(screenWidth / 9);
 
 const styles = StyleSheet.create({
   gridContainer: {
@@ -59,8 +71,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   cell: {
-    width: 60,
-    height: 60,
+    width: cellSize,
+    height: cellSize,
     borderWidth: 1,
     borderColor: 'gray',
     justifyContent: 'center',

@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import { ActivityIndicator, Dimensions, StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useEffect, useState } from 'react';
 import SudokuGrid from '@/components/SudokuGrid';
@@ -48,6 +48,7 @@ export default function TabOneScreen() {
     </View>
   );
 }
+const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
   container: {
@@ -56,11 +57,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 20,
+    fontSize: screenWidth * 0.08,
     fontWeight: 'bold',
+    marginBottom: 20,
   },
   separator: {
-    marginVertical: 30,
+    marginVertical: screenWidth * 0.05,
     height: 1,
     width: '80%',
   },

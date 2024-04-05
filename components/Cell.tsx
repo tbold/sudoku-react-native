@@ -1,6 +1,6 @@
 import { CellResponse } from '@/types';
 import React, { useMemo } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 
 interface CellProps {
   grid: CellResponse[][];
@@ -8,17 +8,21 @@ interface CellProps {
   row: number;
   col: number;
   showHints: boolean;
+  selectedCell: { row: number; col: number } | null;
   onCellChange: (row: number, col: number, value: number) => void;
+  onCellSelect: (row: number, col: number) => void;
 }
+
 const Cell: React.FC<CellProps> = ({
   grid,
   cell,
   row,
   col,
   showHints,
-  onCellChange
+  selectedCell,
+  onCellChange,
+  onCellSelect,
 }) => {
-
   const isConflicting = useMemo(() => {
     return (value: number) => {
       if (!value) return false;
@@ -35,8 +39,8 @@ const Cell: React.FC<CellProps> = ({
 
       if (colConflict) return true;
 
-      const boxRow = Math.floor((row) / 3) * 3;
-      const boxCol = Math.floor((col) / 3) * 3;
+      const boxRow = Math.floor(row / 3) * 3;
+      const boxCol = Math.floor(col / 3) * 3;
 
       for (let i = boxRow; i < boxRow + 3; i++) {
         for (let j = boxCol; j < boxCol + 3; j++) {
@@ -60,92 +64,91 @@ const Cell: React.FC<CellProps> = ({
     }
     return hints;
   };
-  const showCellHints = showHints && !cell.value;
 
+  const showCellHints = showHints && !cell.value;
   const hints = getHints();
   const isError = !cell.isMaster && cell.value && isConflicting(cell.value);
+  const isSelected = selectedCell && selectedCell.row === row && selectedCell.col === col;
 
-  const cellInputStyle = [
-    styles.cellInput,
-    isError ? styles.errorText : null,
+  const cellStyle = [
+    styles.cell,
+    cell.isMaster ? styles.masterCell : null,
+    isSelected ? styles.selectedCell : null,
+    isError ? styles.errorCell : null,
   ];
 
+  const handleCellPress = () => {
+    if (!cell.isMaster) {
+      onCellSelect(row, col);
+    }
+  };
+
   return (
-    cell.isMaster ?
-      <Text style={styles.cellText}>{cell.value}</Text>
-      : (
-        <View style={styles.cellInputContainer}>
-          <TextInput
-            style={cellInputStyle}
-            keyboardType="numeric"
-            maxLength={1}
-            value={cell.value ? cell.value.toString() : ''}
-            onChangeText={(value) => onCellChange(row, col, Number(value))}
-          />
-          {showCellHints && (
-            <View style={styles.hintsContainer}>
-              {[...Array(3)].map((_, rowIndex) => (
-                <View key={rowIndex} style={styles.hintsRow}>
-                  {[...Array(3)].map((_, colIndex) => {
-                    const hintValue = rowIndex * 3 + colIndex + 1;
-                    const isHint = hints.includes(hintValue);
-                    return (
-                      <Text key={colIndex} style={styles.hintText}>
-                        {isHint ? hintValue : ' '}
-                      </Text>
-                    );
-                  })}
-                </View>
-              ))}
+    <TouchableOpacity style={cellStyle} onPress={handleCellPress}>
+      {cell.value ? (
+        <Text style={styles.cellText}>{cell.value}</Text>
+      ) : showCellHints ? (
+        <View style={styles.hintsContainer}>
+          {[...Array(3)].map((_, rowIndex) => (
+            <View key={rowIndex} style={styles.hintsRow}>
+              {[...Array(3)].map((_, colIndex) => {
+                const hintValue = rowIndex * 3 + colIndex + 1;
+                const isHint = hints.includes(hintValue);
+                return (
+                  <Text key={colIndex} style={styles.hintText}>
+                    {isHint ? hintValue : ' '}
+                  </Text>
+                );
+              })}
             </View>
-          )}
+          ))}
         </View>
-      )
+      ) : null}
+    </TouchableOpacity>
   );
 };
 
+
+const screenWidth = Dimensions.get('window').width;
+const cellSize = Math.floor(screenWidth / 9);
+
 const styles = StyleSheet.create({
-  cellText: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  cell: {
+    width: cellSize,
+    height: cellSize,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
   },
-  cellInput: {
-    width: 60,
-    height: 60,
-    fontSize: 24,
-    textAlign: 'center',
+  masterCell: {
+    backgroundColor: 'lightgray',
+  },
+  selectedCell: {
+    backgroundColor: 'yellow',
+  },
+  cellText: {
+    fontSize: cellSize * 0.5,
+    fontWeight: 'bold',
   },
   errorCell: {
     backgroundColor: 'red',
   },
-  errorText: {
-    color: 'red',
-  },
-  cellInputContainer: {
-    width: 60,
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   hintsContainer: {
-    position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
     width: 60,
     height: 60,
-    zIndex: -1,
   },
   hintsRow: {
     flexDirection: 'row',
   },
   hintText: {
-    fontSize: 12,
+    fontSize: cellSize * 0.2, // Adjust the multiplier as needed
     color: 'gray',
-    width: 16,
-    height: 16,
+    width: cellSize * 0.3, // Adjust the multiplier as needed
+    height: cellSize * 0.3, // Adjust the multiplier as needed
     textAlign: 'center',
   },
-
 });
 
 export default Cell;
