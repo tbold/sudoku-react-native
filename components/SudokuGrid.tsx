@@ -1,6 +1,6 @@
 import { CellResponse } from '@/types';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Cell from '@/components/Cell';
 
 interface SudokuGridProps {
@@ -28,7 +28,6 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
               const cellStyle = [
                 (rowIndex + 1) % 3 === 0 && styles.bottomBorder,
                 (cellIndex + 1) % 3 === 0 && styles.rightBorder,
-                styles.cell,
               ];
               return (
                 <View key={cellIndex} style={cellStyle}>
@@ -59,8 +58,6 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
     </View>
   );
 };
-const screenWidth = Dimensions.get('window').width;
-const cellSize = Math.floor(screenWidth / 9);
 
 const styles = StyleSheet.create({
   gridContainer: {
@@ -69,14 +66,6 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-  },
-  cell: {
-    width: cellSize,
-    height: cellSize,
-    borderWidth: 1,
-    borderColor: 'gray',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   bottomBorder: {
     borderBottomWidth: 2,

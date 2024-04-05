@@ -108,9 +108,9 @@ const Cell: React.FC<CellProps> = ({
   );
 };
 
-
 const screenWidth = Dimensions.get('window').width;
-const cellSize = Math.floor(screenWidth / 9);
+const containerPadding = 20;
+const cellSize = Math.floor((screenWidth - containerPadding) / 9);
 
 const styles = StyleSheet.create({
   cell: {
@@ -119,6 +119,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: 'lightgray',
   },
   masterCell: {
     backgroundColor: 'lightgray',
@@ -143,10 +145,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   hintText: {
-    fontSize: cellSize * 0.2, // Adjust the multiplier as needed
+    fontSize: cellSize * 0.2,
     color: 'gray',
-    width: cellSize * 0.3, // Adjust the multiplier as needed
-    height: cellSize * 0.3, // Adjust the multiplier as needed
+    width: cellSize / 3,
+    height: cellSize / 3,
     textAlign: 'center',
   },
 });
