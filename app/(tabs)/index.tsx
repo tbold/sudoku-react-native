@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import { ActivityIndicator, Dimensions, ScrollView, StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useEffect, useState } from 'react';
 import SudokuGrid from '@/components/SudokuGrid';
@@ -32,22 +32,31 @@ export default function TabOneScreen() {
     );
   }
 
-  const handleCellChange = (row: number, col: number, value: number) => {
+  const handleCellChange = (row: number, col: number, value?: number) => {
     if (grid) {
       const updatedGrid = [...grid];
-      updatedGrid[row][col].value = value;
+
+      if (updatedGrid[row][col].value == value) {
+        updatedGrid[row][col].value = undefined;
+      } else {
+        updatedGrid[row][col].value = value;
+      }
       setGrid(updatedGrid);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sudoku</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      {grid && <SudokuGrid grid={grid} onCellChange={handleCellChange} />}
-    </View>
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.title}>Sudoku</Text>
+        <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
+        {grid && <SudokuGrid grid={grid} onCellChange={handleCellChange} />}
+      </View>
+    </ScrollView>
+
   );
 }
+const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
   container: {
@@ -56,11 +65,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 20,
+    fontSize: screenWidth * 0.08,
     fontWeight: 'bold',
   },
   separator: {
-    marginVertical: 30,
+    marginVertical: screenWidth * 0.05,
     height: 1,
     width: '80%',
   },
