@@ -9,7 +9,6 @@ interface CellProps {
   col: number;
   showHints: boolean;
   selectedCell: { row: number; col: number } | null;
-  onCellChange: (row: number, col: number, value: number) => void;
   onCellSelect: (row: number, col: number) => void;
 }
 
@@ -20,7 +19,6 @@ const Cell: React.FC<CellProps> = ({
   col,
   showHints,
   selectedCell,
-  onCellChange,
   onCellSelect,
 }) => {
   const isConflicting = useMemo(() => {
@@ -138,8 +136,6 @@ const styles = StyleSheet.create({
   hintsContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 60,
-    height: 60,
   },
   hintsRow: {
     flexDirection: 'row',

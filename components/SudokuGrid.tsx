@@ -5,7 +5,7 @@ import Cell from '@/components/Cell';
 
 interface SudokuGridProps {
   grid: CellResponse[][];
-  onCellChange: (row: number, col: number, value: number) => void;
+  onCellChange: (row: number, col: number, value?: number) => void;
 }
 
 const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
@@ -16,6 +16,40 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
       setSelectedCell(null);
     } else {
       setSelectedCell({ row, col });
+    }
+  };
+
+  const handleNumberPress = (value: number) => {
+    if (selectedCell) {
+      onCellChange(selectedCell.row, selectedCell.col, value);
+    }
+  };
+
+  const mapTouchableNumber = (value: number) => {
+    return <TouchableOpacity
+      key={value}
+      style={styles.numberButton}
+      onPress={() => handleNumberPress(value)}
+    >
+      <Text style={styles.numberButtonText}>{value}</Text>
+    </TouchableOpacity>
+  }
+  const renderNumberPad = () => {
+    const rowOne = [1, 2, 3, 4, 5].map(mapTouchableNumber);
+    var rowTwo = [6, 7, 8, 9].map(mapTouchableNumber);
+
+    const clearButton = <TouchableOpacity style={styles.numberButton} onPress={handleClearPress}>
+      <Text style={styles.numberButtonText}>X</Text>
+    </TouchableOpacity>
+    rowTwo = [...rowTwo, clearButton];
+
+    return [<View style={styles.numberPadRow}>{rowOne}</View>,
+    <View style={styles.numberPadRow}>{rowTwo}</View>];
+  };
+
+  const handleClearPress = () => {
+    if (selectedCell) {
+      onCellChange(selectedCell.row, selectedCell.col, undefined);
     }
   };
 
@@ -37,7 +71,6 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
                     row={rowIndex}
                     col={cellIndex}
                     showHints={showHints}
-                    onCellChange={onCellChange}
                     onCellSelect={handleCellSelect}
                     selectedCell={selectedCell}
                   />
@@ -55,13 +88,16 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
           {showHints ? 'Hide Hints' : 'Show Hints'}
         </Text>
       </TouchableOpacity>
+      <View style={styles.numberPadContainer}>
+        <View style={styles.numberPad}>{renderNumberPad()}</View>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   gridContainer: {
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: 'black',
   },
   row: {
@@ -84,6 +120,32 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
+    fontWeight: 'bold',
+  },
+  numberPadContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  numberPad: {
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  numberPadRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  numberButton: {
+    width: 40,
+    height: 40,
+    borderWidth: 1,
+    borderColor: 'lightgray',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  numberButtonText: {
+    fontSize: 20,
     fontWeight: 'bold',
   },
 });
