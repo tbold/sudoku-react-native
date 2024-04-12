@@ -10,7 +10,10 @@ interface SudokuGridProps {
 
 const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
   const [showHints, setShowHints] = useState(false);
+  const [editHints, setEditHints] = useState(false);
   const [selectedCell, setSelectedCell] = useState<{ row: number, col: number } | null>(null);
+  const [hintCell, setHintCell] = useState<{ row: number, col: number, value: number } | null>(null);
+
   const handleCellSelect = (row: number, col: number) => {
     if (selectedCell?.row == row && selectedCell.col) {
       setSelectedCell(null);
@@ -25,11 +28,17 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
     }
   };
 
+  const handleEditHint = (value: number) => {
+    if (selectedCell) {
+      setHintCell({ row: selectedCell.row, col: selectedCell.col, value });
+    }
+  };
+
   const mapTouchableNumber = (value: number) => {
     return <TouchableOpacity
-      key={value}
+      key={"numPad-" + value}
       style={styles.numberButton}
-      onPress={() => handleNumberPress(value)}
+      onPress={() => editHints ? handleEditHint(value) : handleNumberPress(value)}
     >
       <Text style={styles.numberButtonText}>{value}</Text>
     </TouchableOpacity>
@@ -38,13 +47,13 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
     const rowOne = [1, 2, 3, 4, 5].map(mapTouchableNumber);
     var rowTwo = [6, 7, 8, 9].map(mapTouchableNumber);
 
-    const clearButton = <TouchableOpacity style={styles.numberButton} onPress={handleClearPress}>
+    const clearButton = <TouchableOpacity key="clearButton" style={styles.numberButton} onPress={handleClearPress}>
       <Text style={styles.numberButtonText}>X</Text>
     </TouchableOpacity>
     rowTwo = [...rowTwo, clearButton];
 
-    return [<View style={styles.numberPadRow}>{rowOne}</View>,
-    <View style={styles.numberPadRow}>{rowTwo}</View>];
+    return [<View key="row-one" style={styles.numberPadRow}>{rowOne}</View>,
+    <View key="row-two" style={styles.numberPadRow}>{rowTwo}</View>];
   };
 
   const handleClearPress = () => {
@@ -64,7 +73,7 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
                 (cellIndex + 1) % 3 === 0 && styles.rightBorder,
               ];
               return (
-                <View key={cellIndex} style={cellStyle}>
+                <View key={"cell-" + cellIndex + "-" + rowIndex} style={cellStyle}>
                   <Cell
                     grid={grid}
                     cell={cell}
@@ -73,6 +82,7 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
                     showHints={showHints}
                     onCellSelect={handleCellSelect}
                     selectedCell={selectedCell}
+                    editHint={hintCell}
                   />
                 </View>
               );
@@ -86,6 +96,14 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({ grid, onCellChange }) => {
       >
         <Text style={styles.buttonText}>
           {showHints ? 'Hide Hints' : 'Show Hints'}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.button, styles.editHintsButton]}
+        onPress={() => setEditHints(!editHints)}
+      >
+        <Text style={styles.buttonText}>
+          {editHints ? 'Disable Hints' : 'Edit Hints'}
         </Text>
       </TouchableOpacity>
       <View style={styles.numberPadContainer}>
@@ -147,6 +165,14 @@ const styles = StyleSheet.create({
   numberButtonText: {
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  editHintsButton: {
+    backgroundColor: 'green',
   },
 });
 

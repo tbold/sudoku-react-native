@@ -1,5 +1,5 @@
 import { CellResponse } from '@/types';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 
 interface CellProps {
@@ -10,6 +10,7 @@ interface CellProps {
   showHints: boolean;
   selectedCell: { row: number; col: number } | null;
   onCellSelect: (row: number, col: number) => void;
+  editHint: { row: number, col: number, value: number } | null;
 }
 
 const Cell: React.FC<CellProps> = ({
@@ -20,6 +21,7 @@ const Cell: React.FC<CellProps> = ({
   showHints,
   selectedCell,
   onCellSelect,
+  editHint,
 }) => {
   const isConflicting = useMemo(() => {
     return (value: number) => {
@@ -51,20 +53,36 @@ const Cell: React.FC<CellProps> = ({
 
       return false;
     };
-  }, [grid, row, col, cell.value]);
+  }, [row, col, cell.value]);
 
-  const getHints = (): number[] => {
-    const hints: number[] = [];
-    for (let value = 1; value <= 9; value++) {
-      if (!isConflicting(value)) {
-        hints.push(value);
+  const getHints = useMemo(() => {
+    return () => {
+      const hints: number[] = [];
+      for (let value = 1; value <= 9; value++) {
+        if (!isConflicting(value)) {
+          hints.push(value);
+        }
+      }
+      return hints;
+    };
+  }, [isConflicting]);
+
+  const [hints, setHints] = useState<number[]>(getHints());
+
+  useEffect(() => {
+    if (editHint && row == editHint.row && col == editHint.col) {
+      if (hints.some(e => e == editHint.value)) {
+        const newHints = hints.filter(e => e != editHint?.value);
+        console.log({ newHints });
+        setHints(newHints);
+      } else {
+        const newHints = [...hints, editHint.value];
+        setHints(newHints);
       }
     }
-    return hints;
-  };
+  }, [editHint?.col, editHint?.row, editHint?.value]);
 
   const showCellHints = showHints && !cell.value;
-  const hints = getHints();
   const isError = !cell.isMaster && cell.value && isConflicting(cell.value);
   const isSelected = selectedCell && selectedCell.row === row && selectedCell.col === col;
 
@@ -93,7 +111,7 @@ const Cell: React.FC<CellProps> = ({
                 const hintValue = rowIndex * 3 + colIndex + 1;
                 const isHint = hints.includes(hintValue);
                 return (
-                  <Text key={colIndex} style={styles.hintText}>
+                  <Text key={"hint-" + colIndex + "-" + rowIndex} style={styles.hintText}>
                     {isHint ? hintValue : ' '}
                   </Text>
                 );
@@ -124,7 +142,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'lightgray',
   },
   selectedCell: {
-    backgroundColor: 'yellow',
+    backgroundColor: 'peachpuff',
   },
   cellText: {
     fontSize: cellSize * 0.5,
@@ -141,7 +159,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   hintText: {
-    fontSize: cellSize * 0.2,
+    fontSize: cellSize * 0.25,
     color: 'gray',
     width: cellSize / 3,
     height: cellSize / 3,
